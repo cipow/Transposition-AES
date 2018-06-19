@@ -1,4 +1,4 @@
-import gi
+import gi, os
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
@@ -15,8 +15,8 @@ class MainGUI(Gtk.Window):
         ## Object
 
         # Choose File
-        buttonChooseFile = Gtk.Button("Select a file")
-        buttonChooseFile.connect("clicked", self.on_button_choose_file_clicked)
+        self.buttonChooseFile = Gtk.Button("Select a file")
+        self.buttonChooseFile.connect("clicked", self.on_button_choose_file_clicked)
 
         # Entry Key
         labelEntryKey = Gtk.Label("Insert Key")
@@ -29,12 +29,20 @@ class MainGUI(Gtk.Window):
         comboBoxMethod.append_text("decrypt")
         comboBoxMethod.set_active(0)
 
+        # Start
+        buttonStart = Gtk.Button("Start")
+
+        # Emtpy space
+        empty = Gtk.Label("")
+
         ## Grid Layout
-        grid.attach(buttonChooseFile, 0, 0, 2, 1)
-        grid.attach_next_to(labelEntryKey, buttonChooseFile, Gtk.PositionType.BOTTOM, 1, 1)
+        grid.attach(self.buttonChooseFile, 0, 0, 2, 1)
+        grid.attach_next_to(labelEntryKey, self.buttonChooseFile, Gtk.PositionType.BOTTOM, 1, 1)
         grid.attach_next_to(entryKey, labelEntryKey, Gtk.PositionType.RIGHT, 1, 1)
         grid.attach_next_to(labelMethod, labelEntryKey, Gtk.PositionType.BOTTOM, 1, 1)
         grid.attach_next_to(comboBoxMethod, labelMethod, Gtk.PositionType.RIGHT, 1, 1)
+        grid.attach(empty, 0, 4, 2, 1)
+        grid.attach_next_to(buttonStart, empty, Gtk.PositionType.BOTTOM, 2, 1)
 
 
     def on_button_choose_file_clicked(self, widget):
@@ -47,8 +55,11 @@ class MainGUI(Gtk.Window):
 
         response = dialog.run()
         if response == Gtk.ResponseType.OK:
-            print("Open clicked")
-            print("File selected: " + dialog.get_filename())
+            self.buttonChooseFile.set_label(dialog.get_filename())
+            if os.path.exists(dialog.get_filename()):
+                print("True")
+            else:
+                print("False")
         elif response == Gtk.ResponseType.CANCEL:
             print("Cancel clicked")
 
