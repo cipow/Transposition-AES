@@ -1,4 +1,5 @@
-import gi, os
+import gi, time, os
+from algorithm import transposition
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
@@ -11,6 +12,7 @@ class MainGUI(Gtk.Window):
 
         grid = Gtk.Grid()
         self.add(grid)
+        self.content = None
 
         ## Object
 
@@ -20,17 +22,18 @@ class MainGUI(Gtk.Window):
 
         # Entry Key
         labelEntryKey = Gtk.Label("Insert Key")
-        entryKey = Gtk.Entry()
+        self.entryKey = Gtk.Entry()
 
         # Method
         labelMethod = Gtk.Label('Choose Method')
-        comboBoxMethod = Gtk.ComboBoxText()
-        comboBoxMethod.append_text("encrypt")
-        comboBoxMethod.append_text("decrypt")
-        comboBoxMethod.set_active(0)
+        self.comboBoxMethod = Gtk.ComboBoxText()
+        self.comboBoxMethod.append_text("encrypt")
+        self.comboBoxMethod.append_text("decrypt")
+        self.comboBoxMethod.set_active(0)
 
         # Start
         buttonStart = Gtk.Button("Start")
+        buttonStart.connect("clicked", self.on_button_start)
 
         # Emtpy space
         empty = Gtk.Label("")
@@ -38,12 +41,25 @@ class MainGUI(Gtk.Window):
         ## Grid Layout
         grid.attach(self.buttonChooseFile, 0, 0, 2, 1)
         grid.attach_next_to(labelEntryKey, self.buttonChooseFile, Gtk.PositionType.BOTTOM, 1, 1)
-        grid.attach_next_to(entryKey, labelEntryKey, Gtk.PositionType.RIGHT, 1, 1)
+        grid.attach_next_to(self.entryKey, labelEntryKey, Gtk.PositionType.RIGHT, 1, 1)
         grid.attach_next_to(labelMethod, labelEntryKey, Gtk.PositionType.BOTTOM, 1, 1)
-        grid.attach_next_to(comboBoxMethod, labelMethod, Gtk.PositionType.RIGHT, 1, 1)
+        grid.attach_next_to(self.comboBoxMethod, labelMethod, Gtk.PositionType.RIGHT, 1, 1)
         grid.attach(empty, 0, 4, 2, 1)
         grid.attach_next_to(buttonStart, empty, Gtk.PositionType.BOTTOM, 2, 1)
 
+    def on_button_start(self, widget):
+        key = self.entryKey.get_text()
+        method = self.comboBoxMethod.get_active_text()
+        print(key+" "+method)
+
+        if method == 'encrypt':
+            translated = transposition.encryptMessage(int(key), self.content)
+        else:
+            translated = transposition.decryptMessage(int(key), self.content)
+
+        outputFileObj = open("encrypt.txt", 'w')
+        outputFileObj.write(translated)
+        outputFileObj.close()
 
     def on_button_choose_file_clicked(self, widget):
         dialog = Gtk.FileChooserDialog("Please choose a file", self,
@@ -56,10 +72,16 @@ class MainGUI(Gtk.Window):
         response = dialog.run()
         if response == Gtk.ResponseType.OK:
             self.buttonChooseFile.set_label(dialog.get_filename())
+
             if os.path.exists(dialog.get_filename()):
+                fileObj = open(dialog.get_filename())
+                self.content = fileObj.read()
+                fileObj.close()
                 print("True")
+
             else:
                 print("False")
+
         elif response == Gtk.ResponseType.CANCEL:
             print("Cancel clicked")
 

@@ -2,10 +2,10 @@ import time, os, sys
 from algorithm import transposition
 
 def main():
-    inputFilename = 'test.txt'
-    outputFilename = 'test.encrypted.txt'
+    inputFilename = 'encrypt.txt'
+    outputFilename = 'decrypted.txt'
     myKey = 10
-    myMode = 'encrypt' # set to 'encrypt' or 'decrypt'
+    myMode = 'decrypt' # set to 'encrypt' or 'decrypt'
 
     # If the input file does not exist, then the program terminates early.
     if not os.path.exists(inputFilename):
