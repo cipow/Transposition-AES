@@ -6,7 +6,7 @@ from gi.repository import Gtk
 class MainGUI(Gtk.Window):
 
     def __init__(self):
-        Gtk.Window.__init__(self, title="Transposition Chiper")
+        Gtk.Window.__init__(self, title="Blowfish and AES Chiper")
         self.set_border_width(10)
         self.set_default_size(200, 200)
 
@@ -50,39 +50,51 @@ class MainGUI(Gtk.Window):
     def on_button_start(self, widget):
         key = self.entryKey.get_text()
         method = self.comboBoxMethod.get_active_text()
-        print(key+" "+method)
 
         if method == 'encrypt':
-            with open(self.fileObj) as objectFile:
-                content = objectFile.read()
+            if os.path.basename(self.fileObj).startswith("(encrypt)"):
+                print("This file already encryption")
 
-            translated = transposition.encryptMessage(int(key), content)
-            outputFilename = os.path.join(
-                                os.path.dirname(self.fileObj),
-                                "tmp(encrypt)"+os.path.basename(self.fileObj))
+            else:
+                startTime = time.time()
+                with open(self.fileObj) as objectFile:
+                    content = objectFile.read()
 
-            with open(outputFilename, 'w') as outputFileObj:
-                outputFileObj.write(translated)
-                os.remove(self.fileObj)
+                translated = transposition.encryptMessage(int(key), content)
+                outputFilename = os.path.join(
+                                    os.path.dirname(self.fileObj),
+                                    "tmp(encrypt)"+os.path.basename(self.fileObj))
 
-            AESlib.encrypt(key, outputFilename)
-            os.remove(outputFilename)
+                with open(outputFilename, 'w') as outputFileObj:
+                    outputFileObj.write(translated)
+                    os.remove(self.fileObj)
+
+                AESlib.encrypt(key, outputFilename)
+                os.remove(outputFilename)
 
         else:
-            outputAESFile = AESlib.decrypt(key, self.fileObj)
-            os.remove(self.fileObj)
+            if os.path.basename(self.fileObj).startswith("(encrypt)"):
+                startTime = time.time()
+                outputAESFile = AESlib.decrypt(key, self.fileObj)
+                os.remove(self.fileObj)
 
-            with open(outputAESFile) as objectFile:
-                content = objectFile.read()
+                with open(outputAESFile) as objectFile:
+                    content = objectFile.read()
 
-            translated = transposition.decryptMessage(int(key), content)
-            outputFilename = os.path.join(
-                                os.path.dirname(outputAESFile),
-                                os.path.basename(outputAESFile)[5:])
+                translated = transposition.decryptMessage(int(key), content)
+                outputFilename = os.path.join(
+                                    os.path.dirname(outputAESFile),
+                                    os.path.basename(outputAESFile)[5:])
 
-            with open(outputFilename, 'w') as outputFileObj:
-                outputFileObj.write(translated)
-                os.remove(outputAESFile)
+                with open(outputFilename, 'w') as outputFileObj:
+                    outputFileObj.write(translated)
+                    os.remove(outputAESFile)
+
+            else:
+                print("This file not encryption")
+
+        totalTime = round(time.time() - startTime, 2)
+        print('%sion time: %s seconds' % (method, totalTime))
 
     def on_button_choose_file_clicked(self, widget):
         dialog = Gtk.FileChooserDialog("Please choose a file", self,
