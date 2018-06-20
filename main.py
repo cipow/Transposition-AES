@@ -35,8 +35,12 @@ class MainGUI(Gtk.Window):
         buttonStart = Gtk.Button("Start")
         buttonStart.connect("clicked", self.on_button_start)
 
+        # Label Notification
+        self.labelNotification = Gtk.Label("")
+
         # Emtpy space
-        empty = Gtk.Label("")
+        empty1 = Gtk.Label("")
+        empty2 = Gtk.Label("")
 
         ## Grid Layout
         grid.attach(self.buttonChooseFile, 0, 0, 2, 1)
@@ -44,8 +48,10 @@ class MainGUI(Gtk.Window):
         grid.attach_next_to(self.entryKey, labelEntryKey, Gtk.PositionType.RIGHT, 1, 1)
         grid.attach_next_to(labelMethod, labelEntryKey, Gtk.PositionType.BOTTOM, 1, 1)
         grid.attach_next_to(self.comboBoxMethod, labelMethod, Gtk.PositionType.RIGHT, 1, 1)
-        grid.attach(empty, 0, 4, 2, 1)
-        grid.attach_next_to(buttonStart, empty, Gtk.PositionType.BOTTOM, 2, 1)
+        grid.attach(empty1, 0, 4, 2, 1)
+        grid.attach_next_to(buttonStart, empty1, Gtk.PositionType.BOTTOM, 2, 1)
+        grid.attach_next_to(empty2, buttonStart, Gtk.PositionType.BOTTOM, 2, 1)
+        grid.attach_next_to(self.labelNotification, empty2, Gtk.PositionType.BOTTOM, 2, 1)
 
     def on_button_start(self, widget):
         key = self.entryKey.get_text()
@@ -54,10 +60,11 @@ class MainGUI(Gtk.Window):
         if method == 'encrypt':
             if os.path.basename(self.fileObj).startswith("(encrypt)"):
                 print("This file already encryption")
+                self.labelNotification.set_label("This file already encryption")
 
             else:
                 startTime = time.time()
-                with open(self.fileObj) as objectFile:
+                with open(self.fileObj, 'r') as objectFile:
                     content = objectFile.read()
 
                 translated = transposition.encryptMessage(int(key), content)
@@ -67,18 +74,21 @@ class MainGUI(Gtk.Window):
 
                 with open(outputFilename, 'w') as outputFileObj:
                     outputFileObj.write(translated)
-                    # os.remove(self.fileObj)
+                    os.remove(self.fileObj)
 
                 AESlib.encrypt(key, outputFilename)
-                # os.remove(outputFilename)
+                os.remove(outputFilename)
+                totalTime = round(time.time() - startTime, 2)
+                print('%sion time: %s seconds' % (method, totalTime))
+                self.labelNotification.set_label("Done\n%sion time: %s seconds" % (method, totalTime))
 
         else:
             if os.path.basename(self.fileObj).startswith("(encrypt)"):
                 startTime = time.time()
                 outputAESFile = AESlib.decrypt(key, self.fileObj)
-                # os.remove(self.fileObj)
+                os.remove(self.fileObj)
 
-                with open(outputAESFile) as objectFile:
+                with open(outputAESFile, 'r') as objectFile:
                     content = objectFile.read()
 
                 translated = transposition.decryptMessage(int(key), content)
@@ -88,13 +98,15 @@ class MainGUI(Gtk.Window):
 
                 with open(outputFilename, 'w') as outputFileObj:
                     outputFileObj.write(translated)
-                    # os.remove(outputAESFile)
+                    os.remove(outputAESFile)
+
+                totalTime = round(time.time() - startTime, 2)
+                print('%sion time: %s seconds' % (method, totalTime))
+                self.labelNotification.set_label("Done\n%sion time: %s seconds" % (method, totalTime))
 
             else:
                 print("This file not encryption")
-
-        totalTime = round(time.time() - startTime, 2)
-        print('%sion time: %s seconds' % (method, totalTime))
+                self.labelNotification.set_label("This file not encryption")
 
     def on_button_choose_file_clicked(self, widget):
         dialog = Gtk.FileChooserDialog("Please choose a file", self,
