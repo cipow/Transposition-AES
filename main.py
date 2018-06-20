@@ -6,7 +6,7 @@ from gi.repository import Gtk
 class MainGUI(Gtk.Window):
 
     def __init__(self):
-        Gtk.Window.__init__(self, title="Blowfish and AES Chiper")
+        Gtk.Window.__init__(self, title="Columnar Transposition and AES Chiper")
         self.set_border_width(10)
         self.set_default_size(200, 200)
 
@@ -67,16 +67,16 @@ class MainGUI(Gtk.Window):
 
                 with open(outputFilename, 'w') as outputFileObj:
                     outputFileObj.write(translated)
-                    os.remove(self.fileObj)
+                    # os.remove(self.fileObj)
 
                 AESlib.encrypt(key, outputFilename)
-                os.remove(outputFilename)
+                # os.remove(outputFilename)
 
         else:
             if os.path.basename(self.fileObj).startswith("(encrypt)"):
                 startTime = time.time()
                 outputAESFile = AESlib.decrypt(key, self.fileObj)
-                os.remove(self.fileObj)
+                # os.remove(self.fileObj)
 
                 with open(outputAESFile) as objectFile:
                     content = objectFile.read()
@@ -88,7 +88,7 @@ class MainGUI(Gtk.Window):
 
                 with open(outputFilename, 'w') as outputFileObj:
                     outputFileObj.write(translated)
-                    os.remove(outputAESFile)
+                    # os.remove(outputAESFile)
 
             else:
                 print("This file not encryption")
@@ -125,11 +125,6 @@ class MainGUI(Gtk.Window):
         filter_text.set_name("Text files")
         filter_text.add_mime_type("text/plain")
         dialog.add_filter(filter_text)
-
-        filter_any = Gtk.FileFilter()
-        filter_any.set_name("Any files")
-        filter_any.add_pattern("*")
-        dialog.add_filter(filter_any)
 
 
 win = MainGUI()

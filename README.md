@@ -1,5 +1,7 @@
 # Super Enkripsi
-Tugas kriptografi penggabungan Blowfish dengan AES
+Tugas kriptografi penggabungan Columnar Transposition dengan AES
+
+> Only support text file
 
 
 ## Depecndecies
