@@ -55,15 +55,18 @@ class MainGUI(Gtk.Window):
 
         if method == 'encrypt':
             translated = transposition.encryptMessage(int(key), self.content)
+            outputFilename = os.path.join(
+                                os.path.dirname(self.fileObj),
+                                "(encrypt)"+os.path.basename(self.fileObj))
         else:
             translated = transposition.decryptMessage(int(key), self.content)
-
-        outputFilename = os.path.join(
-                            os.path.dirname(self.fileObj),
-                            "("+method+")"+os.path.basename(self.fileObj))
+            outputFilename = os.path.join(
+                                os.path.dirname(self.fileObj),
+                                os.path.basename(self.fileObj)[9:])
 
         with open(outputFilename, 'w') as outputFileObj:
             outputFileObj.write(translated)
+            os.remove(self.fileObj)
 
     def on_button_choose_file_clicked(self, widget):
         dialog = Gtk.FileChooserDialog("Please choose a file", self,
