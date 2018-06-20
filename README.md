@@ -3,7 +3,7 @@ Tugas kriptografi penggabungan Transposisi cipher dengan AES
 
 ## Depecndecies
 - python 3.5^
-- PyCryptho
+- PyCryptho 2.6.1^
 
 ## Run
 ```
