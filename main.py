@@ -1,5 +1,5 @@
 import gi, time, os, math
-from lib import transposition
+from lib import transposition, AESlib
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
@@ -12,7 +12,6 @@ class MainGUI(Gtk.Window):
 
         grid = Gtk.Grid()
         self.add(grid)
-        self.content = None
         self.fileObj = None
 
         ## Object
@@ -54,19 +53,36 @@ class MainGUI(Gtk.Window):
         print(key+" "+method)
 
         if method == 'encrypt':
-            translated = transposition.encryptMessage(int(key), self.content)
-            outputFilename = os.path.join(
-                                os.path.dirname(self.fileObj),
-                                "(encrypt)"+os.path.basename(self.fileObj))
-        else:
-            translated = transposition.decryptMessage(int(key), self.content)
-            outputFilename = os.path.join(
-                                os.path.dirname(self.fileObj),
-                                os.path.basename(self.fileObj)[9:])
+            with open(self.fileObj) as objectFile:
+                content = objectFile.read()
 
-        with open(outputFilename, 'w') as outputFileObj:
-            outputFileObj.write(translated)
+            translated = transposition.encryptMessage(int(key), content)
+            outputFilename = os.path.join(
+                                os.path.dirname(self.fileObj),
+                                "tmp(encrypt)"+os.path.basename(self.fileObj))
+
+            with open(outputFilename, 'w') as outputFileObj:
+                outputFileObj.write(translated)
+                os.remove(self.fileObj)
+
+            AESlib.encrypt(key, outputFilename)
+            os.remove(outputFilename)
+
+        else:
+            outputAESFile = AESlib.decrypt(key, self.fileObj)
             os.remove(self.fileObj)
+
+            with open(outputAESFile) as objectFile:
+                content = objectFile.read()
+
+            translated = transposition.decryptMessage(int(key), content)
+            outputFilename = os.path.join(
+                                os.path.dirname(outputAESFile),
+                                os.path.basename(outputAESFile)[5:])
+
+            with open(outputFilename, 'w') as outputFileObj:
+                outputFileObj.write(translated)
+                os.remove(outputAESFile)
 
     def on_button_choose_file_clicked(self, widget):
         dialog = Gtk.FileChooserDialog("Please choose a file", self,
@@ -81,9 +97,6 @@ class MainGUI(Gtk.Window):
             self.buttonChooseFile.set_label(os.path.basename(dialog.get_filename()))
 
             if os.path.exists(dialog.get_filename()):
-                with open(dialog.get_filename()) as fileObj:
-                    self.content = fileObj.read()
-
                 self.fileObj = dialog.get_filename()
                 print("File is found")
 
